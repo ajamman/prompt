@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Prompt Input Page with Header and Logo</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background-color: #333;
+      /* 전체 배경색을 진한 회색으로 변경 */
+    }
+
+    /* 여기에 추가적인 스타일을 정의할 수 있습니다. */
+    header {
+      width: 100%;
+      background-color: #555; /* 헤더 배경색 */
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: start; /* 모든 요소를 시작 부분에서부터 나열 */
+      padding: 10px 20px; /* 상하 10px, 좌우 20px의 패딩 */
+    }
+
+    .logo a img {
+      height: 50px; /* 로고 이미지의 높이 */
+    }
+
+    .header-nav {
+      display: flex;
+      margin-left: 20px; /* 로고와 네비게이션 링크 사이 간격 */
+    }
+
+    .header-nav a {
+      display: inline-block;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: white;
+      font-size: 16px;
+      margin-left: 10px; /* 링크 사이 간격 */
+    }
+
+    .header-nav a:hover,
+    .header-nav a:focus {
+      background-color: #444; /* 호버 및 포커스 시 배경색 변경 */
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+      margin: 20px;
+    }
+
+    .dropbtn {
+      background-color: #555;
+      /* 버튼 배경색을 진한 회색으로 변경 */
+      color: white;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      /* 버튼 테두리를 연한 회색으로 변경 */
+      cursor: pointer;
+      border-radius: 5px;
+      /* 버튼에 둥근 모서리 적용 */
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #555;
+      /* 배경색을 진한 회색으로 변경 */
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      padding: 12px 16px;
+      z-index: 1;
+      border-radius: 5px;
+      /* 드롭다운 메뉴에 둥근 모서리 적용 */
+      color: white;
+      /* 글자 색상을 흰색으로 변경 */
+      font-size: 14px;
+      /* 폰트 크기를 줄임 (기본값보다 작게 설정) */
+    }
+
+    .dropdown-content a {
+      color: white;
+      /* 링크 글자 색상도 흰색으로 변경 */
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      border-radius: 5px;
+      /* 링크에도 약간의 둥근 모서리 적용 */
+    }
+
+    .dropdown-content a:hover {
+      background-color: #666;
+      /* 호버 시 배경색을 조금 더 어두운 회색으로 변경 */
+    }
+
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .dropdown:hover .dropbtn {
+      background-color: #444;
+      /* 호버 시 버튼 배경색을 더 어둡게 변경 */
+    }
+
+    .input-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      /* 패딩을 포함한 너비 계산 */
+      background-color: #555;
+      /* 입력창 배경색 */
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      /* 플렉스 박스를 사용하여 내용물을 정렬 */
+      justify-content: space-between;
+      /* 입력창과 복사 버튼 사이의 공간을 균등 분배 */
+      border-radius: 0 0 5px 5px;
+      /* 둥근 모서리 */
+    }
+
+    #midjourney-prompt,
+    .copy-btn {
+      border-radius: 5px;
+      /* 입력창과 복사 버튼에 둥근 모서리 적용 */
+    }
+
+    #midjourney-prompt {
+      flex-grow: 1;
+      /* 텍스트 입력창이 가능한 모든 공간을 차지하도록 설정 */
+      margin-right: 10px;
+      /* 'Copy' 버튼과의 간격 */
+      color: #fff;
+      /* 텍스트 색상 */
+      padding: 10px;
+      background-color: transparent;
+      border: 1px solid #ccc;
+      /* 입력창 테두리 */
+      border-radius: 5px;
+      /* 둥근 모서리 */
+      font-size: 1em;
+    }
+
+    /* 또는 텍스트 입력창의 포커스 테두리를 완전히 제거 */
+    #midjourney-prompt:focus {
+      outline: none;
+    }
+
+    .copy-btn {
+      padding: 10px 15px;
+      /* 'Copy' 버튼 내부 패딩 */
+      background-color: #555;
+      /* 버튼 배경색 */
+      color: white;
+      border: 1px solid #ccc;
+      /* 버튼 테두리 */
+      border-radius: 5px;
+      /* 둥근 모서리 */
+    }
+
+    .feedback-message {
+      position: fixed;
+      bottom: 70px;
+      right: 20px;
+      opacity: 0;
+      transition: opacity 0.5s;
+      background-color: #444; /* 알림 배경을 어두운 회색으로 변경 */
+      color: white; /* 글자 색상을 흰색으로 변경 */
+      padding: 5px;
+      border-radius: 5px; /* 피드백 메시지에 둥근 모서리 적용 */
+    }
+
+  </style>
+
+
+</head>
+
+<body>
+  <!-- 헤더 및 네비게이션 바 추가 -->
+  <header>
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo.png" alt="Your Logo">
+      </a>
+    </div>
+
+    <nav class="header-nav">
+      <!-- 여기에 나머지 네비게이션 링크를 추가합니다. 예: 소개, 연락처 등 -->
+      <a href="about.html">소개</a>
+      <a href="contact.html">연락처</a>
+    </nav>
+  </header>
+  <!-- 드롭다운 메뉴를 동적으로 추가할 컨테이너 -->
+
+  <div id="dropdown-container"></div>
+
+  <div class="input-container">
+    <input type="text" id="midjourney-prompt" placeholder="Enter your midjourney prompt here...">
+    <button class="copy-btn" id="copy-btn" onclick="copyText()">Copy</button>
+  </div>
+
+  <div class="feedback-message" id="feedback-message">Copied!</div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // 드롭다운 메뉴 데이터, 표시 이름과 실제 입력 값이 다릅니다.
+      const dropdownMenus = [
+        {
+          title: '시대/인류사',
+          prompts: [
+            {display: '석기 시대', value: 'Stone Age'},
+            {display: '신석기 시대', value: 'Neolithic'},
+            {display: '청동기 시대', value: 'Bronze Age'},
+            {display: '철기 시대', value: 'Iron Age'},
+            {display: '고대 문명', value: 'Ancient Civilizations'},
+            {display: '고대 그리스', value: 'Ancient Greece'},
+            {display: '고대 로마', value: 'Ancient Rome'},
+            {display: '중세', value: 'Middle Ages'},
+            {display: '르네상스', value: 'Renaissance'},
+            {display: '발견의 시대', value: 'Age of Discovery'},
+            {display: '계몽 시대', value: 'Enlightenment'},
+            {display: '산업 혁명', value: 'Industrial Revolution'},
+            {display: '근대', value: 'Modern Era'},
+            {display: '냉전 시대', value: 'Cold War'},
+            {display: '정보 시대', value: 'Information Age'},
+            {display: '현대', value: 'Contemporary'},
+            {display: '미래', value: 'Future'}
+          ]
+        },
+        {
+          title: '시대/문화',
+          prompts: [
+            {display: '고대', value: 'Ancient'},
+            {display: '중세', value: 'Medieval'},
+            {display: '르네상스', value: 'Renaissance'},
+            {display: '바로크', value: 'Baroque'},
+            {display: '로코코', value: 'Rococo'},
+            {display: '빅토리아 시대', value: 'Victorian Era'},
+            {display: '산업 혁명', value: 'Industrial Revolution'},
+            {display: '에드워디언', value: 'Edwardian'},
+            {display: '모더니즘', value: 'Modernism'},
+            {display: '아르데코', value: 'Art Deco'},
+            {display: '뉴웨이브', value: 'New Wave'},
+            {display: '사이버펑크', value: 'Cyberpunk'},
+            {display: '스팀펑크', value: 'Steampunk'},
+            {display: '포스트 아포칼립틱', value: 'Post-apocalyptic'},
+            {display: '미래', value: 'Future'}
+          ]
+        },
+        {
+          title: '나이',
+          prompts: [
+            {display: '아기', value: 'baby'},
+            {display: '3살', value: '3years old'},
+            {display: '7살', value: '7years old'},
+            {display: '10살', value: '10years old'},
+            {display: '13살', value: '13years old'},
+            {display: '10대', value: 'teenage'},
+            {display: '20대', value: '20s'},
+            {display: '30대', value: '30s'},
+            {display: '40대', value: '40s'},
+            {display: '50대', value: '50s'},
+            {display: '60대', value: '60s'},
+            {display: '70대', value: '70s'},
+            {display: '80대', value: '80s'},
+            {display: '90대', value: '90s'},
+            {display: '100살', value: '100years old'},
+          ]
+        },
+
+        {
+          title: '사람',
+          prompts: [
+            {display: '백인', value: 'Caucasian'},
+            {display: '흑인', value: 'Black'},
+            {display: '아시아인', value: 'Asian'},
+            {display: '중동인', value: 'Middle Eastern'},
+            {display: '히스패닉', value: 'Hispanic'}
+          ]
+        },
+        {
+          title: '국가',
+          prompts: [
+            { display: '호주', value: 'Australia' },
+            { display: '브라질', value: 'Brazil' },
+            { display: '캐나다', value: 'Canada' },
+            { display: '중국', value: 'China' },
+            { display: '프랑스', value: 'France' },
+            { display: '독일', value: 'Germany' },
+            { display: '인도', value: 'India' },
+            { display: '인도네시아', value: 'Indonesia' },
+            { display: '이탈리아', value: 'Italy' },
+            { display: '일본', value: 'Japan' },
+            { display: '멕시코', value: 'Mexico' },
+            { display: '러시아', value: 'Russia' },
+            { display: '사우디아라비아', value: 'Saudi Arabia' },
+            { display: '남아프리카 공화국', value: 'South Africa' },
+            { display: '한국', value: 'South Korea' },
+            { display: '스페인', value: 'Spain' },
+            { display: '스웨덴', value: 'Sweden' },
+            { display: '스위스', value: 'Switzerland' },
+            { display: '터키', value: 'Turkey' },
+            { display: '영국', value: 'United Kingdom' },
+            { display: '미국', value: 'United States' }
+          ]
+        },
+
+        {
+          title: '성별',
+          prompts: [
+            {display: '사람', value: 'person'},
+            {display: '사람들', value: 'people'},
+            {display: '남자', value: 'man'},
+            {display: '여자', value: 'woman'},
+            {display: '남성', value: 'male'},
+            {display: '여성', value: 'female'},
+            {display: '소년', value: 'boy'},
+            {display: '소녀', value: 'girl'},
+            {display: 'lady', value: 'lady'},
+            {display: 'guy', value: 'guy'},
+          ]
+        },
+        {
+          title: '감정',
+          prompts: [
+            {display: '기쁨', value: 'joyful expression'},
+            {display: '슬픔', value: 'sad and tearful eyes'},
+            {display: '평화로움', value: 'serene and peaceful'},
+            {display: '분노', value: 'intense anger'},
+            {display: '놀람', value: 'surprised and wide-eyed'},
+            {display: '생각에 잠김', value: 'deep in thought'},
+            {display: '웃음', value: 'bursting with laughter'},
+            {display: '혐오', value: 'look of disgust'},
+            {display: '자신감', value: 'radiating confidence'},
+            {display: '슬픔에 잠김', value: 'overcome with grief'},
+            {display: '결심', value: 'showing determination'},
+            {display: '지루함', value: 'expression of boredom'},
+            {display: '향수', value: 'feeling of nostalgia'},
+            {display: '좌절', value: 'visible frustration'},
+            {display: '혼란', value: 'state of confusion'},
+            {display: '충격', value: 'shocked and appalled'},
+            {display: '호기심', value: 'brimming with curiosity'},
+            {display: '우울', value: 'sulking in sadness'},
+            {display: '당황', value: 'flushed with embarrassment'},
+            {display: '행복', value: 'euphoric happiness'}
+          ]
+        },
+        {
+          title: '동작',
+          prompts: [
+            {display: '걷다', value: 'walking'},
+            {display: '달리다', value: 'running'},
+            {display: '뛰다', value: 'jumping'},
+            {display: '앉다', value: 'sitting'},
+            {display: '서다', value: 'standing'},
+            {display: '춤추다', value: 'dancing'},
+            {display: '읽다', value: 'reading'},
+            {display: '쓰다', value: 'writing'},
+            {display: '웃다', value: 'laughing'},
+            {display: '울다', value: 'crying'},
+            {display: '생각하다', value: 'thinking'},
+            {display: '노래하다', value: 'singing'},
+            {display: '요리하다', value: 'cooking'},
+            {display: '먹다', value: 'eating'},
+            {display: '말하다', value: 'speaking'},
+            {display: '듣다', value: 'listening'},
+            {display: '수영하다', value: 'swimming'},
+            {display: '운전하다', value: 'driving'},
+            {display: '타이핑하다', value: 'typing'},
+            {display: '휴식하다', value: 'relaxing'}
+          ]
+        },
+        {
+          title: '전치사',
+          prompts: [
+            {display: 'at', value: 'at'},
+            {display: 'to', value: 'to'},
+            {display: 'from', value: 'from'},
+            {display: 'in', value: 'in'},
+            {display: 'on', value: 'on'},
+            {display: 'above', value: 'above'},
+            {display: 'below', value: 'below'},
+            {display: 'before', value: 'before'},
+            {display: 'behind', value: 'behind'},
+            {display: 'beside', value: 'beside'},
+            {display: 'between', value: 'between'},
+            {display: 'inside', value: 'inside'},
+            {display: 'outside', value: 'outside'},
+            {display: 'near', value: 'near'},
+            {display: 'far', value: 'far'},
+            {display: 'over', value: 'over'},
+            {display: 'under', value: 'under'},
+            {display: 'through', value: 'through'},
+            {display: 'during', value: 'during'},
+            {display: 'about', value: 'about'},
+            {display: 'among', value: 'among'},
+            {display: 'toward', value: 'toward'}
+          ]
+        },
+        {
+          title: '장소/자연',
+          prompts: [
+            {display: '산', value: 'mountain'},
+            {display: '바다', value: 'sea'},
+            {display: '강', value: 'river'},
+            {display: '숲', value: 'forest'},
+            {display: '사막', value: 'desert'},
+            {display: '해변', value: 'beach'},
+            {display: '도시', value: 'city'},
+            {display: '마을', value: 'village'},
+            {display: '공원', value: 'park'},
+            {display: '초원', value: 'meadow'},
+            {display: '계곡', value: 'valley'},
+            {display: '호수', value: 'lake'},
+            {display: '섬', value: 'island'},
+            {display: '빙하', value: 'glacier'},
+            {display: '화산', value: 'volcano'},
+            {display: '동굴', value: 'cave'},
+            {display: '폭포', value: 'waterfall'},
+            {display: '정글', value: 'jungle'},
+            {display: '습지', value: 'wetland'},
+            {display: '산맥', value: 'mountain range'}
+          ]
+        },
+        {
+          title: '장소/도시',
+          prompts: [
+            { display: '카페', value: 'Cafe' },
+            { display: '도서관', value: 'Library' },
+            { display: '공원', value: 'Park' },
+            { display: '상점가', value: 'Shopping District' },
+            { display: '지하철역', value: 'Subway Station' },
+            { display: '박물관', value: 'Museum' },
+            { display: '갤러리', value: 'Art Gallery' },
+            { display: '대학교', value: 'University' },
+            { display: '병원', value: 'Hospital' },
+            { display: '비즈니스 지구', value: 'Business District' },
+            { display: '해변', value: 'Beach' },
+            { display: '교량', value: 'Bridge' },
+            { display: '스포츠 경기장', value: 'Sports Stadium' },
+            { display: '콘서트 홀', value: 'Concert Hall' },
+            { display: '호텔', value: 'Hotel' },
+            { display: '공항', value: 'Airport' },
+            { display: '야경이 아름다운 장소', value: 'Place with Beautiful Night View' },
+            { display: '시장', value: 'Market' },
+            { display: '식당가', value: 'Restaurant Area' },
+            { display: '테마파크', value: 'Theme Park' }
+          ]
+        },
+        {
+          title: '조명',
+          prompts: [
+            { display: '자연광', value: 'natural light' },
+            { display: '햇빛', value: 'sunlight' },
+            { display: '그림자', value: 'shadows light' },
+            { display: '황혼', value: 'twilight light' },
+            { display: '촛빌', value: 'candlelight' },
+            { display: '형광등', value: 'fluorescent light' },
+            { display: '네온등', value: 'neon light' },
+            { display: '반사광', value: 'reflected light' },
+            { display: '실루엣', value: 'silhouette light' },
+            { display: '백라이트', value: 'backlight' },
+            { display: '직사광선', value: 'direct light' },
+            { display: '간접조명', value: 'indirect light' },
+            { display: '황금시간', value: 'golden hour light' },
+            { display: '푸른 시간', value: 'blue hour light' },
+            { display: '매직 아워', value: 'magic hour light' },
+            { display: '스포트라이트', value: 'spotlight' },
+            { display: '소프트 라이트', value: 'soft light' },
+            { display: '하드 라이트', value: 'hard light' },
+            { display: '모닝 라이트', value: 'morning light' },
+            { display: '일몰', value: 'sunset light' }
+          ]
+        },//조명
+        {
+          title: '색상',
+          prompts: [
+            { display: '흰색', value: 'white color' },
+            { display: '검정색', value: 'black color' },
+            { display: '회색', value: 'grey color' },
+            { display: '파란색', value: 'blue color' },
+            { display: '녹색', value: 'green color' },
+            { display: '빨간색', value: 'red color' },
+            { display: '노란색', value: 'yellow color' },
+            { display: '주황색', value: 'orange color' },
+            { display: '진홍색', value: 'crimson color' },
+            { display: '연두색', value: 'lime color' },
+            { display: '청록색', value: 'turquoise color' },
+            { display: '하늘색', value: 'sky blue color' },
+            { display: '남색', value: 'navy color' },
+            { display: '보라색', value: 'purple color' },
+            { display: '자주색', value: 'magenta color' },
+            { display: '분홍색', value: 'pink color' },
+            { display: '적갈색', value: 'maroon color' },
+            { display: '갈색', value: 'brown color' },
+            { display: '은색', value: 'silver color' },
+            { display: '금색', value: 'gold color' },
+            { display: '구리색', value: 'copper color' }
+          ]
+        },//색상
+
+
+        {
+          title: '구도',
+          prompts: [
+            { display: '전면', value: 'Frontal View' },
+            { display: '측면', value: 'Side View' },
+            { display: '후면', value: 'Rear View' },
+            { display: '상단', value: 'Top View' },
+            { display: '하단', value: 'Bottom View' },
+            { display: '대각선 위', value: 'Diagonal View from Above' },
+            { display: '대각선 아래', value: 'Diagonal View from Below' },
+            { display: '근접', value: 'Close-up' },
+            { display: '중거리', value: 'Mid-range' },
+            { display: '원거리', value: 'Long-range' },
+            { display: '와이드', value: 'Wide Angle' },
+            { display: '파노라마', value: 'Panoramic' },
+            { display: '버스트 샷', value: 'Burst Shot' },
+            { display: '포인트 오브 뷰', value: 'Point of View' },
+            { display: '눈높이', value: 'Eye Level' },
+            { display: '버드 아이 뷰', value: 'Bird\'s Eye View' },
+            { display: '웜스 아이 뷰', value: 'Worm\'s Eye View' },
+            { display: '오버 더 숄더', value: 'Over the Shoulder' },
+            { display: '프로파일 샷', value: 'Profile Shot' },
+            { display: '실루엣', value: 'Silhouette' }
+          ]
+        },//구도
+        {
+          title: '스타일/아트',
+          prompts: [
+            { display: '추상 표현주의', value: 'Abstract Expressionism style' },
+            { display: '아르 누보', value: 'Art Nouveau style' },
+            { display: '아방가르드', value: 'Avant-Garde style' },
+            { display: '바우하우스', value: 'Bauhaus style' },
+            { display: '바로크', value: 'Baroque style' },
+            { display: '고전주의', value: 'Classicism style' },
+            { display: '개념 예술', value: 'Conceptual Art style' },
+            { display: '구성주의 예술', value: 'Constructivism Art style' },
+            { display: '현대 예술', value: 'Contemporary Art style' },
+            { display: '큐비즘', value: 'Cubism style' },
+            { display: '다다이즘', value: 'Dadaism style' },
+            { display: '데 스틸', value: 'De Stijl style' },
+            { display: '표현주의', value: 'Expressionism style' },
+            { display: '플럭서스', value: 'Fluxus style' },
+            { display: '미래주의', value: 'Futurism style' },
+            { display: '고딕 아트', value: 'Gothic Art style' },
+            { display: '할렘 르네상스', value: 'Harlem Renaissance style' },
+            { display: '설치 예술', value: 'Installation Art style' },
+            { display: '운동 예술', value: 'Kinetic Art style' },
+            { display: '랜드 아트', value: 'Land Art style' },
+            { display: '마법적 리얼리즘', value: 'Magical Realism style' },
+            { display: '모던 아트', value: 'Modern Art style' },
+            { display: '자연주의', value: 'Naturalism style' },
+            { display: '신고전주의', value: 'Neoclassicism style' },
+            { display: '퍼포먼스 아트', value: 'Performance Art style' },
+            { display: '포토리얼리즘', value: 'Photorealism style' },
+            { display: '팝 아트', value: 'Pop Art style' },
+            { display: '포스트-인상주의', value: 'Post-Impressionism style' },
+            { display: '원시주의', value: 'Primitivism style' },
+            { display: '로코코', value: 'Rococo style' },
+            { display: '로맨티시즘', value: 'Romanticism style' },
+            { display: '르네상스', value: 'Renaissance style' },
+            { display: '스트리트 아트', value: 'Street Art style' },
+            { display: '초현실주의', value: 'Suprematism style' },
+            { display: '우키요에', value: 'Ukiyo-e style' }
+          ]
+        },//스타일아트
+
+        {
+          title: '스타일/드로잉',
+          prompts: [
+            { display: '스케치', value: 'Sketch' },
+            { display: '라인 아트', value: 'Line Art' },
+            { display: '도트워크', value: 'Dotwork' },
+            { display: '실루엣', value: 'Silhouette' },
+            { display: '채색', value: 'Coloring' },
+            { display: '셰이딩', value: 'Shading' },
+            { display: '교차 해칭', value: 'Cross Hatching' },
+            { display: '컨투어 드로잉', value: 'Contour Drawing' },
+            { display: '스텐실 아트', value: 'Stencil Art' },
+            { display: '디지털 스케치', value: 'Digital Sketch' },
+            { display: '캐리커처', value: 'Caricature' },
+            { display: '컨셉 아트', value: 'Concept Art' },
+            { display: '스토리보드', value: 'Storyboard' },
+            { display: '만화', value: 'Comics' },
+            { display: '일러스트레이션', value: 'Illustration' },
+            { display: '아나모픽 아트', value: 'Anamorphic Art' },
+            { display: '3D 드로잉', value: '3D Drawing' },
+            { display: '포토리얼리즘', value: 'Photorealism' },
+            { display: '판타지 아트', value: 'Fantasy Art' },
+            { display: '추상 드로잉', value: 'Abstract Drawing' }
+          ]
+        },//스타일드로잉
+        {
+          title: '스타일/인테리어',
+          prompts: [
+            { display: '미니멀리즘', value: 'Minimalism interior style' },
+            { display: '인더스트리얼', value: 'Industrial interior style' },
+            { display: '스칸디나비안', value: 'Scandinavian interior style' },
+            { display: '미드 센추리 모던', value: 'Mid-Century Modern interior style' },
+            { display: '보헤미안', value: 'Bohemian interior style' },
+            { display: '러스틱', value: 'Rustic interior style' },
+            { display: '코지', value: 'Cozy interior style' },
+            { display: '모던', value: 'Modern interior style' },
+            { display: '컨템포러리', value: 'Contemporary interior style' },
+            { display: '트래디셔널', value: 'Traditional interior style' },
+            { display: '글래머러스', value: 'Glamorous interior style' },
+            { display: '에클렉틱', value: 'Eclectic interior style' },
+            { display: '빈티지', value: 'Vintage interior style' },
+            { display: '아트 데코', value: 'Art Deco interior style' },
+            { display: '프렌치 컨트리', value: 'French Country interior style' },
+            { display: '네오 클래시컬', value: 'Neoclassical interior style' },
+            { display: '코스탈', value: 'Coastal interior style' },
+            { display: '젠', value: 'Zen interior style' },
+            { display: '모로칸', value: 'Moroccan interior style' },
+            { display: '컨트리', value: 'Country interior style' }
+          ]
+        },//스타일인테리어
+        {
+              title: '시네마틱/카메라',
+              prompts: [
+                { display: '라이카 M11', value: 'Leica M11' },
+                { display: '니콘 Z6II', value: 'Nikon Z6II' },
+                { display: '소니 a7s', value: 'Sony a7s' },
+                { display: 'DJI 미니 3 프로', value: 'DJI Mini 3 Pro' },
+                { display: '캐논 EOS R5', value: 'Canon EOS R5' },
+                { display: '파나소닉 Lumix GH5', value: 'Panasonic Lumix GH5' },
+                { display: '후지필름 X-T4', value: 'Fujifilm X-T4' },
+                { display: '올림푸스 OM-D E-M1 Mark III', value: 'Olympus OM-D E-M1 Mark III' },
+                { display: '펜탁스 K-1 Mark II', value: 'Pentax K-1 Mark II' },
+                { display: '하셀블라드 X1D II 50C', value: 'Hasselblad X1D II 50C' },
+                { display: '블랙매직 디자인 Pocket Cinema Camera', value: 'Blackmagic Design Pocket Cinema Camera' },
+                { display: '소니 FX3', value: 'Sony FX3' },
+                { display: '레드 디지털 시네마 카메라', value: 'RED Digital Cinema Camera' },
+                { display: 'ARRI 알렉사 미니', value: 'ARRI Alexa Mini' },
+                { display: 'Z CAM E2', value: 'Z CAM E2' }
+              ]
+            },//시네마틱/카메라
+
+
+        {
+          title: '이미지 비율',
+          prompts: [
+            { display: '1:1', value: '--ar 1:1' },
+            { display: '4:3', value: '--ar 4:3' },
+            { display: '16:9', value: '--ar 16:9' },
+            { display: '21:9', value: '--ar 21:9' },
+            { display: '2:1', value: '--ar 2:1' },
+            { display: '3:4', value: '--ar 3:4' },
+            { display: '3:2', value: '--ar 3:2' },
+            { display: '2:3', value: '--ar 2:3' },
+            { display: '9:16', value: '--ar 9:16' },
+            { display: '4:5', value: '--ar 4:5' }
+          ]
+        }, //이미지비율
+        {
+          title: '파라미터(--)',
+          prompts: [
+            { display: '--niji', value: '--niji' },
+            { display: '--style raw', value: '--style raw' },
+            { display: '--iw', value: '--iw' },
+            { display: '--stylize', value: '--stylize' },
+            { display: '--cref', value: '--cref' },
+            { display: '--sref', value: '--sref' },
+            { display: '--cw', value: '--cw' },
+            { display: '--sw', value: '--sw' },
+            { display: '--seed', value: '--seed' },
+            { display: '--no', value: '--no' },
+            { display: '--quality', value: '--quality' },
+            { display: '--relax', value: '--relax' },
+            { display: '--repeat', value: '--repeat' },
+            { display: '--stop', value: '--stop' },
+            { display: '--chaos', value: '--chaos' },
+            { display: '--weird', value: '--weird' }
+          ]
+        }
+
+
+
+        // 여기에 추가적인 드롭다운 메뉴 데이터를 추가할 수 있습니다.
+      ];
+
+      const container = document.getElementById('dropdown-container');
+
+      dropdownMenus.forEach(menu => {
+        const dropdown = document.createElement('div');
+        dropdown.className = 'dropdown';
+
+        const button = document.createElement('button');
+        button.className = 'dropbtn';
+        button.textContent = menu.title;
+        dropdown.appendChild(button);
+
+        const dropdownContent = document.createElement('div');
+        dropdownContent.className = 'dropdown-content';
+
+        menu.prompts.forEach(prompt => {
+          const link = document.createElement('a');
+          link.href = '#';
+          link.textContent = prompt.display; // 표시 이름 사용
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectPrompt(prompt.value); // 실제 입력 값 사용
+          });
+          dropdownContent.appendChild(link);
+        });
+
+        dropdown.appendChild(dropdownContent);
+        container.appendChild(dropdown);
+      });
+    });
+
+
+    function selectPrompt(prompt) {
+      const inputField = document.getElementById('midjourney-prompt');
+      // 현재 커서의 위치를 가져옵니다.
+      const startPos = inputField.selectionStart;
+      const endPos = inputField.selectionEnd;
+      // 커서 위치에 프롬프트를 삽입합니다.
+      inputField.value = inputField.value.substring(0, startPos) +
+        prompt + ' ' +
+        inputField.value.substring(endPos);
+      // 커서를 삽입된 텍스트 바로 뒤로 이동시킵니다.
+      inputField.selectionStart = inputField.selectionEnd = startPos + prompt.length + 1;
+      inputField.focus(); // 입력창에 포커스를 다시 맞춥니다.
+    }
+
+    function copyText() {
+      const inputField = document.getElementById('midjourney-prompt');
+      navigator.clipboard.writeText(inputField.value).then(() => {
+        const feedbackMessage = document.getElementById('feedback-message');
+        feedbackMessage.textContent = 'Copied!';
+        feedbackMessage.style.opacity = 1;
+        setTimeout(() => {
+          feedbackMessage.style.opacity = 0;
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+
+    window.onload = function () {
+      var inputField = document.getElementById('midjourney-prompt');
+      inputField.focus();
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+      // 페이지 로드 시 localStorage에서 저장된 텍스트를 불러옵니다.
+      const savedPrompt = localStorage.getItem('midjourneyPrompt');
+      if (savedPrompt) {
+        document.getElementById('midjourney-prompt').value = savedPrompt;
+      }
+
+      // 입력창의 내용이 변경될 때마다 localStorage에 저장합니다.
+      document.getElementById('midjourney-prompt').addEventListener('input', function() {
+        const promptText = this.value;
+        localStorage.setItem('midjourneyPrompt', promptText);
+      });
+    });
+
+    function copyText() {
+      const inputField = document.getElementById('midjourney-prompt');
+      navigator.clipboard.writeText(inputField.value).then(() => {
+        const feedbackMessage = document.getElementById('feedback-message');
+        feedbackMessage.textContent = 'Copied!';
+        feedbackMessage.style.opacity = 1;
+        setTimeout(() => {
+          feedbackMessage.style.opacity = 0;
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 페이지 로드 시 localStorage에서 저장된 텍스트를 불러옵니다.
+      const savedPrompt = localStorage.getItem('midjourneyPrompt');
+      if (savedPrompt) {
+        document.getElementById('midjourney-prompt').value = savedPrompt;
+      }
+
+      // 입력창의 내용이 변경될 때마다 localStorage에 저장합니다.
+      document.getElementById('midjourney-prompt').addEventListener('input', function() {
+        const promptText = this.value;
+        localStorage.setItem('midjourneyPrompt', promptText);
+      });
+    });
+
+    function copyText() {
+      const inputField = document.getElementById('midjourney-prompt');
+      navigator.clipboard.writeText(inputField.value).then(() => {
+        const feedbackMessage = document.getElementById('feedback-message');
+        feedbackMessage.textContent = 'Copied!';
+        feedbackMessage.style.opacity = 1;
+        setTimeout(() => {
+          feedbackMessage.style.opacity = 0;
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+  </script>
+
+</body>
+
+</html>
